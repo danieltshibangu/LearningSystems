@@ -6,6 +6,16 @@ This allows pieces of code to run simultaneously as others run
 rather than having to wait for each code to run sequentially
 '''
 
+'''
+first message recieved from client is a header of 8 bytes
+since we don't know how big a message is going to be the server will 
+get two messages: the aqmount of bytes from the header and the actual msg
+'''
+HEADER = 8
+
+# format used in possible decryption
+FORMAT = 'utf-8'
+
 #want a port that isnt being used
 # other common ports are 8080 or 80 used for HTTP or the web
 PORT = 5050
@@ -25,7 +35,12 @@ SERVER = socket.gethostbyname(socket.gethostname())
 # binding a socket to an address must be in a tuple with server and port
 ADDR = (SERVER, PORT)
 
-#---- We have the port(5050) and the server, next we pick the socket 
+# when recieved, we disconnect client from server
+DISCONNECT_MESSAGE = "!DISCONNECT"
+
+#-----------------------------------------------------------------------
+
+#We have the port(5050) and the server, next we pick the socket 
 # and bind socket to address
 
 # Here we create a socket, in this case to make a TCP connection 
@@ -54,6 +69,9 @@ server.bind(ADDR)
 def start():
     # allow server to listen for connections
     server.listen()
+
+    print( f"[LISTENING] Server is listening on {SERVER}" )
+
     # server will continue to listen until error or manual end  
     while True:
         #when a new connection is found, it is accepted. The IP and port it 
@@ -85,8 +103,25 @@ def handle_client(conn, addr):
         '''
 
         # we recieve messages through the socket conn
-        msg = conn.recv()
- 
+        # the recv() method needs a number for bytes to recieved
+        # aka need a protocol to determine number of bytes for messages that
+        # can be recieved
+
+        # when msgs are sent they are encoded into byte format so they 
+        # must be decoded into utf-8 format
+        msg_length = conn.recv(HEADER).decode(FORMAT)   # HOW LONG IS  MSG
+        msg_length = int(msg_length)                    # TURN MSG LENGTH TO INT
+        msg = conn.recv(msg_length).decode(FORMAT)      # RECIEVE ACTUAL MSG
+
+        #---- disconnecting -------
+        if msg == DISCONNECT_MESSAGE:
+            connected = False
+
+        # print the address and msg    
+        print(f'[{addr}] {msg}')                        
+
+      
+
 # output code to indicate server is listening. The IP and port it came from 
 # is given to addr, then is stored in obj conn allowing it to communicate back
 print( "[STARTING] server is starting...")
