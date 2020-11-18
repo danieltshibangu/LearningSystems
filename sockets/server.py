@@ -110,18 +110,20 @@ def handle_client(conn, addr):
         # when msgs are sent they are encoded into byte format so they 
         # must be decoded into utf-8 format
         msg_length = conn.recv(HEADER).decode(FORMAT)   # HOW LONG IS  MSG
-        msg_length = int(msg_length)                    # TURN MSG LENGTH TO INT
-        msg = conn.recv(msg_length).decode(FORMAT)      # RECIEVE ACTUAL MSG
+        
+        if msg_length:
+            msg_length = int(msg_length)                    # TURN MSG LENGTH TO INT
+            msg = conn.recv(msg_length).decode(FORMAT)      # RECIEVE ACTUAL MSG
 
-        #---- disconnecting -------
-        if msg == DISCONNECT_MESSAGE:
-            connected = False
+            #---- disconnecting -------
+            if msg == DISCONNECT_MESSAGE:
+                connected = False
 
-        # print the address and msg    
-        print(f'[{addr}] {msg}')                        
-
+            # print the address and msg    
+            print(f'[{addr}] {msg}')  
+            
+    conn.close()        
       
-
 # output code to indicate server is listening. The IP and port it came from 
 # is given to addr, then is stored in obj conn allowing it to communicate back
 print( "[STARTING] server is starting...")
