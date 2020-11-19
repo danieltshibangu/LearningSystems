@@ -32,5 +32,23 @@ def send(msg):
     #message needs to be encoded into a byte format to be sent to server
     #or perhaps to travel through a TCP connection?
     message = msg.encode(FORMAT)
-    msg_lenth = len(message)
+    msg_length = len(message)
+
+    # the length of message is converted to a string and encoded in utf-8 format
     send_length = str(msg_length).encode(FORMAT)
+
+    #pad to make it a length of 8 bytes
+    # so subtract 8 bytes by the length of the message to find whitespace length 
+    # b' ' is the byte representation of the calculated length ( whitespace)
+    send_length += b' ' * (HEADER - len(send_length))
+
+    client.send(send_length)
+    client.send(message)
+
+send("Hello World!")
+input()
+send("Hello Everyone!")
+input()
+send("Hello Bop!")
+
+send(DISCONNECT_MESSAGE)
